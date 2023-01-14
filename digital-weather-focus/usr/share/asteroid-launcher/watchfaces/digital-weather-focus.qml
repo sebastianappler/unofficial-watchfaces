@@ -27,11 +27,11 @@ import QtQuick 2.15
 import QtQuick.Shapes 1.15
 import QtSensors 5.11
 import QtGraphicalEffects 1.15
-import org.asteroid.controls 1.0
-import org.asteroid.utils 1.0
-import Nemo.Configuration 1.0
-import Nemo.Mce 1.0
-import Connman 0.2
+//import org.asteroid.controls 1.0
+//import org.asteroid.utils 1.0
+//import Nemo.Configuration 1.0
+//import Nemo.Mce 1.0
+//import Connman 0.2
 import 'weathericons.js' as WeatherIcons
 
 Item {
@@ -94,12 +94,17 @@ Item {
         hrmSwitchArc.requestPaint()
     }
 
-    MceBatteryState {
-        id: batteryChargeState
-    }
+//    MceBatteryState {
+//        id: batteryChargeState
+//    }
 
-    MceBatteryLevel {
-        id: batteryChargePercentage
+//    MceBatteryLevel {
+//        id: batteryChargePercentage
+//    }
+
+    Item {
+      id: batteryChargePercentage
+      property var value: (featureSlider.value * 100).toFixed(0)
     }
 
     Item {
@@ -416,30 +421,35 @@ Item {
         width: boxSize
         height: width
 
-        ConfigurationValue {
+
+        //ConfigurationValue {
+        Item {
             id: timestampDay0
 
-            key: "/org/asteroidos/weather/timestamp-day0"
-            defaultValue: 0
+            //key: "/org/asteroidos/weather/timestamp-day0"
+            //defaultValue: 0
         }
 
-        ConfigurationValue {
+        //ConfigurationValue {
+        Item {
             id: useFahrenheit
 
-            key: "/org/asteroidos/settings/use-fahrenheit"
-            defaultValue: false
+//            key: "/org/asteroidos/settings/use-fahrenheit"
+//            defaultValue: false
         }
 
-        ConfigurationValue {
+        //ConfigurationValue {
+        Item {
             id: owmId
-            key: "/org/asteroidos/weather/day" + dayNb + "/id"
-            defaultValue: 0
+//            key: "/org/asteroidos/weather/day" + dayNb + "/id"
+//            defaultValue: 0
         }
 
-        ConfigurationValue {
+        //ConfigurationValue {
+        Item {
             id: maxTemp
-            key: "/org/asteroidos/weather/day" + dayNb + "/max-temp"
-            defaultValue: 0
+//            key: "/org/asteroidos/weather/day" + dayNb + "/max-temp"
+//            defaultValue: 0
         }
 
         // Work around for the beta release here. Currently catching for -273° string to display the no data message.
@@ -485,41 +495,41 @@ Item {
             }
         }
 
-        Icon {
-            // WeatherIcons depends on import 'weathericons.js' as WeatherIcons
-            id: iconDisplay
+//        Icon {
+//            // WeatherIcons depends on import 'weathericons.js' as WeatherIcons
+//            id: iconDisplay
 
-            anchors {
-                centerIn: parent
-                verticalCenterOffset: -parent.height * .155
-            }
-            width: parent.width * .42
-            height: width
-            opacity: activeContentOpacity
-            visible: weatherBox.weatherSynced
-            name: WeatherIcons.getIconName(owmId.value)
-        }
+//            anchors {
+//                centerIn: parent
+//                verticalCenterOffset: -parent.height * .155
+//            }
+//            width: parent.width * .42
+//            height: width
+//            opacity: activeContentOpacity
+//            visible: weatherBox.weatherSynced
+//            name: WeatherIcons.getIconName(owmId.value)
+//        }
 
-        Label {
-            id: maxDisplay
+//        Label {
+//            id: maxDisplay
 
-            anchors {
-                centerIn: parent
-                verticalCenterOffset: parent.height * (weatherBox.weatherSynced ? .155 : 0)
-                horizontalCenterOffset: parent.height * (weatherBox.weatherSynced ? .05 : 0)
-            }
-            width: parent.width
-            height: width
-            horizontalAlignment: Text.AlignHCenter
-            verticalAlignment: Text.AlignVCenter
-            opacity: activeContentOpacity
-            font {
-                family: "Barlow"
-                styleName: weatherBox.weatherSynced ? "Medium" : "Bold"
-                pixelSize: parent.width * (weatherBox.weatherSynced ? .30 : .14)
-            }
-            text: weatherBox.weatherSynced ? kelvinToTemperatureString(maxTemp.value) : "NO<br>WEATHER<br>DATA"
-        }
+//            anchors {
+//                centerIn: parent
+//                verticalCenterOffset: parent.height * (weatherBox.weatherSynced ? .155 : 0)
+//                horizontalCenterOffset: parent.height * (weatherBox.weatherSynced ? .05 : 0)
+//            }
+//            width: parent.width
+//            height: width
+//            horizontalAlignment: Text.AlignHCenter
+//            verticalAlignment: Text.AlignVCenter
+//            opacity: activeContentOpacity
+//            font {
+//                family: "Barlow"
+//                styleName: weatherBox.weatherSynced ? "Medium" : "Bold"
+//                pixelSize: parent.width * (weatherBox.weatherSynced ? .30 : .14)
+//            }
+//            text: weatherBox.weatherSynced ? kelvinToTemperatureString(maxTemp.value) : "NO<br>WEATHER<br>DATA"
+//        }
 
         // Preparation for a feature to open the weather app when the weatherBox is pressed.
         // Needs a delegate to hold the application names afaiu
@@ -638,14 +648,14 @@ Item {
         // HrmSensor depends on import QtSensors 5.11
         id: hrmBox
 
-        HrmSensor {
-            active: !displayAmbient && hrmSensorActive
-            onReadingChanged: {
-                root.hrmBpm = reading.bpm;
-                root.hrmBpmTime = wallClock.time
-                hrmArc.requestPaint()
-            }
-        }
+//        HrmSensor {
+//            active: !displayAmbient && hrmSensorActive
+//            onReadingChanged: {
+//                root.hrmBpm = reading.bpm;
+//                root.hrmBpmTime = wallClock.time
+//                hrmArc.requestPaint()
+//            }
+//        }
 
         anchors {
             centerIn: root
@@ -753,9 +763,9 @@ Item {
         // BluetoothStatus depends on import org.asteroid.utils 1.0
         id: btSwitch
 
-        BluetoothStatus {
-            id: btStatus
-        }
+//        BluetoothStatus {
+//            id: btStatus
+//        }
 
         property bool btStatusOn: btStatus.powered
         property bool btStatusConnect: btStatus.connected
@@ -805,18 +815,18 @@ Item {
             }
         }
 
-        Icon {
-            id: btIcon
+//        Icon {
+//            id: btIcon
 
-            anchors {
-                centerIn: parent
-                verticalCenterOffset: parent.width * .01
-            }
-            width: parent.width * .6
-            height: width
-            name: btStatus.powered && btStatus.connected ? "ios-bluetooth-connected" : "ios-bluetooth"
-            opacity: btStatus.powered ? activeContentOpacity : inactiveContentOpacity
-        }
+//            anchors {
+//                centerIn: parent
+//                verticalCenterOffset: parent.width * .01
+//            }
+//            width: parent.width * .6
+//            height: width
+//            name: btStatus.powered && btStatus.connected ? "ios-bluetooth-connected" : "ios-bluetooth"
+//            opacity: btStatus.powered ? activeContentOpacity : inactiveContentOpacity
+//        }
     }
 
     Item {
@@ -825,11 +835,11 @@ Item {
         // NetworkTechnology depends on import Connman 0.2
         id: wifiSwitch
 
-        NetworkTechnology {
-            id: wifiStatus
+//        NetworkTechnology {
+//            id: wifiStatus
 
-            path: "/net/connman/technology/wifi"
-        }
+//            path: "/net/connman/technology/wifi"
+//        }
 
         property bool wifiStatusOn: wifiStatus.powered
 
@@ -877,18 +887,18 @@ Item {
             }
         }
 
-        Icon {
-            id: wifiIcon
+//        Icon {
+//            id: wifiIcon
 
-            anchors {
-                centerIn: parent
-                verticalCenterOffset: parent.width * .03
-            }
-            width: parent.width * .6
-            height: width
-            name: "ios-wifi"
-            opacity: wifiStatus.powered ? activeContentOpacity : inactiveContentOpacity
-        }
+//            anchors {
+//                centerIn: parent
+//                verticalCenterOffset: parent.width * .03
+//            }
+//            width: parent.width * .6
+//            height: width
+//            name: "ios-wifi"
+//            opacity: wifiStatus.powered ? activeContentOpacity : inactiveContentOpacity
+//        }
     }
 
     Item {
@@ -951,19 +961,19 @@ Item {
             }
         }
 
-        Icon {
-            id: batteryIcon
+//        Icon {
+//            id: batteryIcon
 
-            name: "ios-flash"
-            visible: batteryChargeState.value === MceBatteryState.Charging
-            anchors {
-                centerIn: parent
-                verticalCenterOffset: -parent.height * .26
-            }
-            width: parent.width * .25
-            height: width
-            opacity: inactiveContentOpacity
-        }
+//            name: "ios-flash"
+//            visible: batteryChargeState.value === MceBatteryState.Charging
+//            anchors {
+//                centerIn: parent
+//                verticalCenterOffset: -parent.height * .26
+//            }
+//            width: parent.width * .25
+//            height: width
+//            opacity: inactiveContentOpacity
+//        }
 
         Text {
             id: batteryDisplay
@@ -1004,7 +1014,7 @@ Item {
         id: handBox
 
         width: root.width
-        height: width
+        height: root.height
 
         Image {
             id: hourSVG
@@ -1013,7 +1023,7 @@ Item {
 
             anchors.centerIn: parent
             width: parent.width
-            height: width
+            height: parent.height
             source: imgPath + (hourSVG.toggle24h ? "hour-24h.svg" : "hour-12h.svg")
             antialiasing: true
             smooth: true
@@ -1025,6 +1035,7 @@ Item {
                            (wallClock.time.getHours() * 15) + (wallClock.time.getMinutes() * .25) :
                            (wallClock.time.getHours() * 30) + (wallClock.time.getMinutes() * .5)
             }
+
             layer {
                 enabled: true
                 samples: 4
@@ -1047,7 +1058,7 @@ Item {
 
             anchors.centerIn: parent
             width: parent.width
-            height: width
+            height: parent.height
             source: imgPath + "minute.svg"
             antialiasing: true
             smooth: true
@@ -1079,7 +1090,7 @@ Item {
 
             anchors.centerIn: parent
             width: parent.width
-            height: width
+            height: parent.height
             source: imgPath + "second.svg"
             antialiasing: true
             smooth: true
