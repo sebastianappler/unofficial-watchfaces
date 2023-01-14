@@ -27,6 +27,7 @@ import QtQuick 2.15
 import QtQuick.Shapes 1.15
 import QtSensors 5.11
 import QtGraphicalEffects 1.15
+
 //import org.asteroid.controls 1.0
 //import org.asteroid.utils 1.0
 //import Nemo.Configuration 1.0
@@ -180,7 +181,8 @@ Item {
 
         anchors {
             centerIn: root
-            horizontalCenterOffset: -root.width * .25
+            horizontalCenterOffset: -root.width * .20
+            verticalCenterOffset: -root.height * .12
         }
         width: !dockMode.active ? boxSize : boxSize
         height: width
@@ -191,11 +193,11 @@ Item {
             anchors {
                 centerIn: parent
                 //rightMargin: parent.width * .01
-                verticalCenter: parent.verticalCenter
+                //verticalCenter: parent.verticalCenter
             }
 
             font {
-                pixelSize: parent.width * .35
+                pixelSize: parent.width * .40
                 family: "Noto Sans"
                 styleName: "Regular"
                 letterSpacing: -parent.width * .001
@@ -213,10 +215,10 @@ Item {
                 leftMargin: parent.width * .01
             }
             font {
-                pixelSize: parent.width * .35
+                pixelSize: parent.width * .40
                 family: "Noto Sans"
                 styleName: "Regular"
-                letterSpacing: -parent.width * .001
+                //letterSpacing: -parent.width * .001
             }
             color: "#ccffffff"
             text: if (use12H.value) {
@@ -234,13 +236,76 @@ Item {
                 leftMargin: parent.width * .01
             }
             font {
-                pixelSize: parent.width * .35
+                pixelSize: parent.width * .40
                 family: "Noto Sans"
                 styleName: "Light"
-                letterSpacing: -parent.width * .001
+                //letterSpacing: -parent.width * .001
             }
             color: "#ddffffff"
             text: wallClock.time.toLocaleString(Qt.locale(), "mm")
+        }
+
+
+        Item {
+            // Wrapper for date related objects, day name, day number and month short code.
+            id: secondBox
+
+            anchors {
+                centerIn: parent
+                //horizontalCenterOffset: -parent.width * .25
+            }
+            width: boxSize * 1.75
+            height: width
+
+            Canvas {
+                z: 6
+                id: secondStrokes
+                property var second: 0
+                anchors.fill: parent
+                smooth: true
+                renderStrategy: Canvas.Cooperative
+                onPaint: {
+                    var ctx = getContext("2d")
+                    ctx.reset()
+                    ctx.lineWidth = parent.height/58
+                    ctx.lineCap="round"
+                    ctx.strokeStyle = "#8b8b8b"
+                    ctx.translate(parent.width/2, parent.height/2)
+                    ctx.rotate(Math.PI)
+                    for (var i=0; i <= 60; i++) {
+                        ctx.beginPath()
+                        ctx.moveTo(0, height*0.367)
+                        ctx.lineTo(0, height*0.387)
+                        ctx.stroke()
+                        ctx.rotate(Math.PI/30)
+                    }
+                }
+            }
+
+            Canvas {
+                z: 6
+                id: secondDisplay
+                property var second: 0
+                anchors.fill: parent
+                smooth: true
+                renderStrategy: Canvas.Cooperative
+                onPaint: {
+                    var ctx = getContext("2d")
+                    ctx.reset()
+                    ctx.lineWidth = parent.height/58
+                    ctx.lineCap="round"
+                    ctx.strokeStyle = "#f5c07b"
+                    ctx.translate(parent.width/2, parent.height/2)
+                    ctx.rotate(Math.PI)
+                    for (var i=0; i <= wallClock.time.getSeconds(); i++) {
+                        ctx.beginPath()
+                        ctx.moveTo(0, height*0.367)
+                        ctx.lineTo(0, height*0.387)
+                        ctx.stroke()
+                        ctx.rotate(Math.PI/30)
+                    }
+                }
+            }
         }
     }
 
@@ -253,10 +318,9 @@ Item {
         anchors {
             centerIn: root
             //horizontalCenterOffset: -boxPosition * .78
-            verticalCenterOffset: boxPosition * 1.25
-        }
-        width: boxSize
-        height: width
+            verticalCenterOffset: boxPosition * 1.25        }
+        width: parent.width
+        height: parent.height * 0.3
 
 
         //ConfigurationValue {
@@ -297,35 +361,17 @@ Item {
             id: weatherArc
 
             anchors.fill: parent
-            opacity: inactiveArcOpacity
             smooth: true
             visible: !dockMode.active
             renderStrategy : Canvas.Cooperative
             onPaint: {
                 var ctx = getContext("2d")
                 ctx.reset()
-                ctx.lineWidth = outerArcLineWidth
-                ctx.lineCap="round"
-                ctx.strokeStyle = "#33ffffff"
                 ctx.beginPath()
-                ctx.arc(parent.width / 2,
-                        parent.height / 2,
-                        parent.width * .43,
-                        270 * rad,
-                        360,
-                        false);
-                ctx.stroke()
-                ctx.closePath()
-                ctx.beginPath()
-                ctx.fillStyle = "#22ffffff"
-                ctx.arc(parent.width / 2,
-                        parent.height / 2,
-                        parent.width * .43,
-                        270 * rad,
-                        360,
-                        false);
-                ctx.strokeStyle = boxColor
-                ctx.lineWidth = innerArcLineWidth
+                ctx.fillStyle = Qt.rgba(0.278, 0.278, 0.278, 1)
+                ctx.strokeStyle = ctx.fillStyle
+                ctx.roundedRect(15, 0, width - 30, height, 27, 27)
+
                 ctx.stroke()
                 ctx.fill()
                 ctx.closePath()
@@ -338,14 +384,69 @@ Item {
 
 //            anchors {
 //                centerIn: parent
-//                verticalCenterOffset: -parent.height * .155
+//                horizontalCenterOffset: -parent.width * .27
 //            }
-//            width: parent.width * .42
+//            width: parent.width * .25
 //            height: width
 //            opacity: activeContentOpacity
 //            visible: weatherBox.weatherSynced
 //            name: WeatherIcons.getIconName(owmId.value)
 //        }
+
+        Text {
+            id: weatherIcon
+
+            anchors {
+                centerIn: parent
+                horizontalCenterOffset: -parent.width * .27
+            }
+            font {
+                pixelSize: parent.width * .25
+                family: "Noto Sans"
+                styleName: "Regular"
+                letterSpacing: parent.width * .001
+            }
+            color: "#ccffffff"
+            text: "O"
+        }
+
+        Text {
+            id: weatherTemperature
+
+            y: parent.height * .15
+            x: parent.width * .40
+            anchors {
+               horizontalCenterOffset: width / 4
+               verticalCenterOffset: -parent.height * .15
+            }
+            font {
+                pixelSize: parent.width * 0.075
+                family: "Noto Sans"
+                styleName: "Regular"
+                letterSpacing: parent.width * .001
+            }
+            color: "#ccffffff"
+            text: "17°C - 24°C"
+        }
+
+        Text {
+            id: weatherDescription
+            y: parent.height * .50
+            x: parent.width * .40
+            anchors {
+                horizontalCenterOffset: width / 2
+                verticalCenterOffset: parent.height * .15
+
+            }
+            font {
+                pixelSize: parent.width * 0.075
+                family: "Noto Sans"
+                styleName: "Regular"
+                letterSpacing: parent.width * .001
+            }
+            color: "#ccffffff"
+            text: "Partly Clouds"
+        }
 
 //        Label {
 //            id: maxDisplay
@@ -480,155 +581,6 @@ Item {
         }
     }
 
-//    Item {
-//        // Wrapper for the battery related elements
-//        // MceBatteryLevel and MceBatteryState depend on Nemo.Mce 1.0
-//        id: batteryBox
-
-//        property int value: batteryChargePercentage.percent
-
-//        onValueChanged: batteryArc.requestPaint()
-
-//        anchors {
-//            centerIn: root
-//            verticalCenterOffset: boxPosition
-//        }
-//        width: boxSize
-//        height: width
-//        visible: !dockMode.active
-
-//        Canvas {
-//            id: batteryArc
-
-//            anchors.fill: parent
-//            opacity: activeArcOpacity
-//            smooth: true
-//            renderStrategy : Canvas.Cooperative
-//            onPaint: {
-//                var ctx = getContext("2d")
-//                ctx.reset()
-//                ctx.beginPath()
-//                ctx.fillStyle = "#22ffffff"
-//                ctx.arc(parent.width / 2,
-//                        parent.height / 2,
-//                        parent.width * .43,
-//                        270 * rad,
-//                        360,
-//                        false);
-//                ctx.strokeStyle = "#77ffffff"
-//                ctx.lineWidth = innerArcLineWidth
-//                ctx.stroke()
-//                ctx.fill()
-//                ctx.closePath()
-//                ctx.lineWidth = outerArcLineWidth
-//                ctx.lineCap="round"
-//                ctx.strokeStyle = batteryBox.value < 30 ?
-//                            customRed :
-//                            batteryBox.value < 60 ?
-//                                customOrange :
-//                                customGreen
-//                ctx.beginPath()
-//                ctx.arc(parent.width / 2,
-//                        parent.height / 2,
-//                        parent.width * .43,
-//                        270 * rad,
-//                        ((batteryBox.value/100*360)+270) * rad,
-//                        false
-//                        );
-//                ctx.stroke()
-//                ctx.closePath()
-//            }
-//        }
-
-////        Icon {
-////            id: batteryIcon
-
-////            name: "ios-flash"
-////            visible: batteryChargeState.value === MceBatteryState.Charging
-////            anchors {
-////                centerIn: parent
-////                verticalCenterOffset: -parent.height * .26
-////            }
-////            width: parent.width * .25
-////            height: width
-////            opacity: inactiveContentOpacity
-////        }
-
-////        Text {
-////            id: batteryDisplay
-
-////            anchors {
-////                centerIn: parent
-////            }
-////            font {
-////                pixelSize: parent.width * .38
-////                family: "Noto Sans"
-////                styleName: "Condensed"
-////            }
-////            color: "#ffffffff"
-////            opacity: activeContentOpacity
-////            text: batteryBox.value
-////        }
-
-////        Text {
-////            id: chargeText
-
-////            anchors {
-////                centerIn: parent
-////                verticalCenterOffset: parent.width * .25
-////            }
-////            font {
-////                pixelSize: parent.width * .14
-////                family: "Barlow"
-////                styleName: "Bold"
-////            }
-////            color: "#ffffffff"
-////            opacity: inactiveContentOpacity
-////            text: "%"
-////        }
-//    }
-    Item {
-        // Wrapper for date related objects, day name, day number and month short code.
-        id: secondBox
-
-        anchors {
-            centerIn: root
-            horizontalCenterOffset: -root.width * .25
-        }
-        width: boxSize * 1.5
-        height: width
-
-        Canvas {
-            z: 6
-            id: secondDisplay
-            property var second: 0
-            anchors.fill: parent
-            smooth: true
-            renderStrategy: Canvas.Cooperative
-            onPaint: {
-                var ctx = getContext("2d")
-                ctx.reset()
-                ctx.shadowColor = Qt.rgba(0.245, 0.192, 0.123, 0.85)
-                ctx.shadowOffsetX = 0
-                ctx.shadowOffsetY = 0
-                ctx.shadowBlur = 5
-                ctx.lineWidth = parent.height/58
-                ctx.lineCap="round"
-                ctx.strokeStyle = "#f5c07b"
-                ctx.translate(parent.width/2, parent.height/2)
-                ctx.rotate(Math.PI)
-                for (var i=0; i <= wallClock.time.getSeconds(); i++) {
-                    ctx.beginPath()
-                    ctx.moveTo(0, height*0.367)
-                    ctx.lineTo(0, height*0.377)
-                    ctx.stroke()
-                    ctx.rotate(Math.PI/30)
-                }
-            }
-        }
-    }
-
-
     Connections {
         target: wallClock
         function onDisplayAmbientEntered() {
@@ -642,10 +594,4 @@ Item {
             }
         }
     }
-
-//    Component.onCompleted: {
-//       var second = wallClock.time.getSeconds()
-//       secondDisplay.second = second
-//       secondDisplay.requestPaint()
-//    }
 }
