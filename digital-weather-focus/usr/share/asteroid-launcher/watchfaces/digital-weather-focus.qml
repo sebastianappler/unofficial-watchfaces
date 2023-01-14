@@ -28,11 +28,11 @@ import QtQuick.Shapes 1.15
 import QtSensors 5.11
 import QtGraphicalEffects 1.15
 
-//import org.asteroid.controls 1.0
-//import org.asteroid.utils 1.0
-//import Nemo.Configuration 1.0
-//import Nemo.Mce 1.0
-//import Connman 0.2
+import org.asteroid.controls 1.0
+import org.asteroid.utils 1.0
+import Nemo.Configuration 1.0
+import Nemo.Mce 1.0
+import Connman 0.2
 import 'weathericons.js' as WeatherIcons
 
 Item {
@@ -64,6 +64,7 @@ Item {
     property string customOrange: "#FFC600" // Mikado Yellow
     property string boxColor: "#E8DCB9" // Dutch White
     property string switchColor: "#A2D6F9" // Uranian Blue
+    property string orangeColor: "#e5aa70"
 
     // HRM initialisation. Needs to be declared global since hrmBox and hrmSwitch both need it.
     property int hrmBpm: 0
@@ -75,10 +76,10 @@ Item {
 
     function kelvinToTemperatureString(kelvin) {
         var celsius = (kelvin - 273);
-        if(!useFahrenheit.value)
-            return celsius + "°";
+        if(useFahrenheit.value)
+            return Math.round(((celsius) * 9 / 5) + 32) + "°F";
         else
-            return Math.round(((celsius) * 9 / 5) + 32) + "°";
+            return celsius + "°C";
     }
 
     // Prepare for feature where the secondary hardware button activates HRM mode.
@@ -176,15 +177,64 @@ Item {
     }
 
     Item {
+        // Wrapper for date related objects, day name, day number and month short code.
+        id: dayBox
+
+        anchors {
+            centerIn: root
+            horizontalCenterOffset: -root.width * .29
+            verticalCenterOffset: -root.height * .43
+        }
+        width: parent.width
+        height: parent.height * 0.10
+
+        Text {
+            id: monthName
+
+            anchors {
+                centerIn: parent
+            }
+            font {
+                pixelSize: root.width * .08
+                family: "Barlow"
+                styleName: "Bold"
+            }
+            color: orangeColor
+            //opacity: displayAmbient ? inactiveArcOpacity : activeContentOpacity
+            text: wallClock.time.toLocaleString(Qt.locale(), "MMM").slice(0, 3).toUpperCase() +
+                  " " +
+                  wallClock.time.toLocaleString(Qt.locale(), "dd").slice(0, 2).toUpperCase()
+        }
+
+        Text {
+            id: dayNumber
+
+            anchors {
+                top: monthName.bottom
+                left: monthName.left
+            }
+            font {
+                pixelSize: root.width * .07
+                family: "Noto Sans"
+                styleName: "Condensed"
+            }
+            color: "#ffffffff"
+            opacity: activeContentOpacity
+            text: wallClock.time.toLocaleString(Qt.locale(), "ddd").slice(0, 3).toUpperCase()
+        }
+
+    }
+
+    Item {
         // Wrapper for digital time related objects. Hour, minute and AP following units setting.
         id: digitalBox
 
         anchors {
             centerIn: root
-            horizontalCenterOffset: -root.width * .20
-            verticalCenterOffset: -root.height * .12
+            horizontalCenterOffset: -root.width * .2
+            verticalCenterOffset: -root.height * .08
         }
-        width: !dockMode.active ? boxSize : boxSize
+        width: root.height * 0.55
         height: width
         opacity: activeContentOpacity
 
@@ -192,12 +242,10 @@ Item {
             id: digitalSeparator
             anchors {
                 centerIn: parent
-                //rightMargin: parent.width * .01
-                //verticalCenter: parent.verticalCenter
             }
 
             font {
-                pixelSize: parent.width * .40
+                pixelSize: parent.width * .22
                 family: "Noto Sans"
                 styleName: "Regular"
                 letterSpacing: -parent.width * .001
@@ -215,7 +263,7 @@ Item {
                 leftMargin: parent.width * .01
             }
             font {
-                pixelSize: parent.width * .40
+                pixelSize: parent.width * .22
                 family: "Noto Sans"
                 styleName: "Regular"
                 //letterSpacing: -parent.width * .001
@@ -236,10 +284,9 @@ Item {
                 leftMargin: parent.width * .01
             }
             font {
-                pixelSize: parent.width * .40
+                pixelSize: parent.width * .22
                 family: "Noto Sans"
                 styleName: "Light"
-                //letterSpacing: -parent.width * .001
             }
             color: "#ddffffff"
             text: wallClock.time.toLocaleString(Qt.locale(), "mm")
@@ -254,8 +301,8 @@ Item {
                 centerIn: parent
                 //horizontalCenterOffset: -parent.width * .25
             }
-            width: boxSize * 1.75
-            height: width
+            width: parent.width
+            height: parent.height
 
             Canvas {
                 z: 6
@@ -275,7 +322,7 @@ Item {
                     for (var i=0; i <= 60; i++) {
                         ctx.beginPath()
                         ctx.moveTo(0, height*0.367)
-                        ctx.lineTo(0, height*0.387)
+                        ctx.lineTo(0, height*0.395)
                         ctx.stroke()
                         ctx.rotate(Math.PI/30)
                     }
@@ -294,7 +341,7 @@ Item {
                     ctx.reset()
                     ctx.lineWidth = parent.height/58
                     ctx.lineCap="round"
-                    ctx.strokeStyle = "#f5c07b"
+                    ctx.strokeStyle = orangeColor
                     ctx.translate(parent.width/2, parent.height/2)
                     ctx.rotate(Math.PI)
                     for (var i=0; i <= wallClock.time.getSeconds(); i++) {
@@ -317,8 +364,8 @@ Item {
 
         anchors {
             centerIn: root
-            //horizontalCenterOffset: -boxPosition * .78
-            verticalCenterOffset: boxPosition * 1.25        }
+            verticalCenterOffset: root.height * .32
+        }
         width: parent.width
         height: parent.height * 0.3
 
@@ -331,34 +378,42 @@ Item {
             //defaultValue: 0
         }
 
-        //ConfigurationValue {
-        Item {
+        ConfigurationValue {
+        //Item {
             id: useFahrenheit
-
-//            key: "/org/asteroidos/settings/use-fahrenheit"
-//            defaultValue: false
+            key: "/org/asteroidos/settings/use-fahrenheit"
+            defaultValue: false
         }
 
-        //ConfigurationValue {
-        Item {
+        ConfigurationValue {
+        //Item {
             id: owmId
-//            key: "/org/asteroidos/weather/day" + dayNb + "/id"
-//            defaultValue: 0
+            key: "/org/asteroidos/weather/day" + dayNb + "/id"
+            defaultValue: 0
         }
 
-        //ConfigurationValue {
-        Item {
+        ConfigurationValue {
+        //Item {
             id: maxTemp
-//            key: "/org/asteroidos/weather/day" + dayNb + "/max-temp"
-//            defaultValue: 0
+            key: "/org/asteroidos/weather/day" + dayNb + "/max-temp"
+            defaultValue: 0
         }
+
+
+        ConfigurationValue {
+        //Item {
+            id: minTemp
+            key: "/org/asteroidos/weather/day" + dayNb + "/min-temp"
+            defaultValue: 0
+        }
+
 
         // Work around for the beta release here. Currently catching for -273° string to display the no data message.
         // Plan is to use the commented check. But the result is always false like used now. Likely due to timestamp0 expecting a listview or delegate?
         property bool weatherSynced: kelvinToTemperatureString(maxTemp.value) !== "-273°" //availableDays(timestampDay0.value*1000) > 0
 
         Canvas {
-            id: weatherArc
+            id: weatherRect
 
             anchors.fill: parent
             smooth: true
@@ -378,37 +433,37 @@ Item {
             }
         }
 
-//        Icon {
-//            // WeatherIcons depends on import 'weathericons.js' as WeatherIcons
-//            id: iconDisplay
-
-//            anchors {
-//                centerIn: parent
-//                horizontalCenterOffset: -parent.width * .27
-//            }
-//            width: parent.width * .25
-//            height: width
-//            opacity: activeContentOpacity
-//            visible: weatherBox.weatherSynced
-//            name: WeatherIcons.getIconName(owmId.value)
-//        }
-
-        Text {
-            id: weatherIcon
+        Icon {
+            // WeatherIcons depends on import 'weathericons.js' as WeatherIcons
+            id: iconDisplay
 
             anchors {
                 centerIn: parent
                 horizontalCenterOffset: -parent.width * .27
             }
-            font {
-                pixelSize: parent.width * .25
-                family: "Noto Sans"
-                styleName: "Regular"
-                letterSpacing: parent.width * .001
-            }
-            color: "#ccffffff"
-            text: "O"
+            width: parent.width * .25
+            height: width
+            opacity: activeContentOpacity
+            visible: weatherBox.weatherSynced
+            name: WeatherIcons.getIconName(owmId.value)
         }
+
+//        Text {
+//            id: weatherIcon
+
+//            anchors {
+//                centerIn: parent
+//                horizontalCenterOffset: -parent.width * .27
+//            }
+//            font {
+//                pixelSize: parent.width * .25
+//                family: "Noto Sans"
+//                styleName: "Regular"
+//                letterSpacing: parent.width * .001
+//            }
+//            color: "#ccffffff"
+//            text: "O"
+//        }
 
         Text {
             id: weatherTemperature
@@ -426,7 +481,7 @@ Item {
                 letterSpacing: parent.width * .001
             }
             color: "#ccffffff"
-            text: "17°C - 24°C"
+            text: kelvinToTemperatureString(minTemp.value) + " - " + kelvinToTemperatureString(maxTemp.value)
         }
 
         Text {
@@ -445,7 +500,7 @@ Item {
                 letterSpacing: parent.width * .001
             }
             color: "#ccffffff"
-            text: "Partly Clouds"
+            text: WeatherIcons.getWeatherDesc(owmId.value)
         }
 
 //        Label {
@@ -477,108 +532,6 @@ Item {
                weather.launchApplication()
             }
         }*/
-    }
-
-    Item {
-        // Wrapper for date related objects, day name, day number and month short code.
-        id: dayBox
-
-        anchors {
-            centerIn: root
-            horizontalCenterOffset: !dockMode.active ? boxPosition : boxPosition * .78
-        }
-        width: boxSize
-        height: width
-        visible: !hrmSensorActive
-
-        Canvas {
-            id: dayArc
-
-            anchors.fill: parent
-            opacity: inactiveArcOpacity
-            smooth: true
-            visible: !dockMode.active
-            renderStrategy : Canvas.Cooperative
-            onPaint: {
-                var ctx = getContext("2d")
-                ctx.reset()
-                ctx.beginPath()
-                ctx.fillStyle = "#22ffffff"
-                ctx.arc(parent.width / 2,
-                        parent.height / 2,
-                        parent.width * .43,
-                        270 * rad,
-                        360,
-                        false);
-                ctx.strokeStyle = boxColor
-                ctx.lineWidth = innerArcLineWidth
-                ctx.stroke()
-                ctx.fill()
-                ctx.closePath()
-                ctx.lineWidth = outerArcLineWidth
-                ctx.lineCap="round"
-                ctx.strokeStyle = "#33ffffff"
-                ctx.beginPath()
-                ctx.arc(parent.width / 2,
-                        parent.height / 2,
-                        parent.width * .43,
-                        270 * rad,
-                        360,
-                        false);
-                ctx.stroke()
-                ctx.closePath()
-            }
-        }
-
-        Text {
-            id: dayName
-
-            anchors {
-                centerIn: parent
-                verticalCenterOffset: -parent.width * .25
-            }
-            font {
-                pixelSize: parent.width * .14
-                family: "Barlow"
-                styleName: "Bold"
-            }
-            color: "#ffffffff"
-            opacity: displayAmbient ? inactiveArcOpacity : activeContentOpacity
-            text: wallClock.time.toLocaleString(Qt.locale(), "ddd").slice(0, 3).toUpperCase()
-        }
-
-        Text {
-            id: dayNumber
-
-            anchors {
-                centerIn: parent
-            }
-            font {
-                pixelSize: parent.width * .38
-                family: "Noto Sans"
-                styleName: "Condensed"
-            }
-            color: "#ffffffff"
-            opacity: activeContentOpacity
-            text: wallClock.time.toLocaleString(Qt.locale(), "dd").slice(0, 2).toUpperCase()
-        }
-
-        Text {
-            id: monthName
-
-            anchors {
-                centerIn: parent
-                verticalCenterOffset: parent.width * .25
-            }
-            font {
-                pixelSize: parent.width * .14
-                family: "Barlow"
-                styleName: "Bold"
-            }
-            color: "#ffffffff"
-            opacity: displayAmbient ? inactiveArcOpacity : activeContentOpacity
-            text: wallClock.time.toLocaleString(Qt.locale(), "MMM").slice(0, 3).toUpperCase()
-        }
     }
 
     Connections {
