@@ -42,52 +42,31 @@ Item {
 
     property string imgPath: "../watchfaces-img/digital-weather-focus-"
 
-    // Radian per degree used by all canvas arcs
-    property real rad: .01745
-
     // Element sizes, positioning, linewidth and opacity
-    property real switchSize: root.width * .1375
-    property real boxSize: root.width * .35
-    property real switchPosition: root.width * .26
-    property real boxPosition: root.width * .25
-    property real innerArcLineWidth: root.height * .008
-    property real outerArcLineWidth: root.height * .016
-    property real activeArcOpacity: !displayAmbient ? .7 : .4
-    property real inactiveArcOpacity: !displayAmbient ? .5 : .3
     property real activeContentOpacity: !displayAmbient ? .95 : .6
     property real inactiveContentOpacity: !displayAmbient ? .5 : .3
 
     // Color definition
-    property string customRed: "#DB5461" // Indian Red
-    property string customBlue: "#1E96FC" // Dodger Blue
-    property string customGreen: "#26C485" // Ocean Green
-    property string customOrange: "#FFC600" // Mikado Yellow
-    property string boxColor: "#E8DCB9" // Dutch White
-    property string switchColor: "#A2D6F9" // Uranian Blue
-    property string orangeColor: "#e5aa70"
+    property string colorOrange: "#e5aa70"
+    property string colorLightGrey: "#8b8b8b"
+    property string colorDarkGrey: "#424242"
 
-    // HRM initialisation. Needs to be declared global since hrmBox and hrmSwitch both need it.
-    property int hrmBpm: 0
-    property bool hrmSensorActive: false
-    property var hrmBpmTime: wallClock.time
+    // Font
+    property string fontColor: "#ccffffff"
+    property string fontFamily: "Noto Sans"
+    property string fontStyleName: "Regular"
+    property int fontSizeBig: root.width * .22
+    property int fontSizeMedium: root.width * .08
+    property int fontSizeSmall: root.width * .07
 
     // Set day to use in the weatherBox to today.
     property int dayNb: 0
 
-// Uncomment for qml-tester
-//    property var useFahrenheit: {
-//        "value": false
-//    }
-//    property var owmId: {
-//        //"value": 310
-//        "value": 310
-//    }
-//    property var minTemp: {
-//        "value": 300
-//    }
-//    property var maxTemp: {
-//        "value": 308
-//    }
+//    // Uncomment for qml-tester
+//    property var useFahrenheit: { "value": false }
+//    property var owmId: { "value": 310 }
+//    property var minTemp: { "value": 300 }
+//    property var maxTemp: { "value": 308 }
 
     function kelvinToTemperatureString(kelvin) {
         var celsius = (kelvin - 273);
@@ -95,100 +74,6 @@ Item {
             return Math.round(((celsius) * 9 / 5) + 32) + "°F";
         else
             return celsius + "°C";
-    }
-
-    // Prepare for feature where the secondary hardware button activates HRM mode.
-    // Keycode 134 = Sawfish lower button.
-    /*Keys.onPressed: {
-        if (event.keyCode === 134) {
-            hrmSensorActive = !hrmSensorActive
-        }
-    }*/
-
-    // Request the heart rate related arcs to be repainted when hrm sensor is toggled.
-    onHrmSensorActiveChanged: {
-        hrmArc.requestPaint()
-        hrmSwitchArc.requestPaint()
-    }
-
-//    MceBatteryState {
-//        id: batteryChargeState
-//    }
-
-//    MceBatteryLevel {
-//        id: batteryChargePercentage
-//    }
-
-    Item {
-      id: batteryChargePercentage
-      property var value: (featureSlider.value * 100).toFixed(0)
-    }
-
-    Item {
-        id: dockMode
-
-        readonly property bool active: nightstand
-        property int batteryPercentChanged: batteryChargePercentage.percent
-
-        anchors.fill: parent
-        visible: dockMode.active
-        layer {
-            enabled: true
-            samples: 4
-            smooth: true
-            textureSize: Qt.size(dockMode.width * 2, dockMode.height * 2)
-        }
-
-        Shape {
-            id: chargeArc
-
-            property real angle: batteryChargePercentage.percent * 360 / 100
-            // radius of arc is scalefactor * height or width
-            property real arcStrokeWidth: 0.016
-            property real scalefactor: 0.39 - (arcStrokeWidth / 2)
-            property var chargecolor: Math.floor(batteryChargePercentage.percent / 33.35)
-            readonly property var colorArray: [ "red", "yellow", Qt.rgba(0.318, 1, 0.051, 0.9)]
-
-            anchors.fill: parent
-
-            ShapePath {
-                fillColor: "transparent"
-                strokeColor: chargeArc.colorArray[chargeArc.chargecolor]
-                strokeWidth: parent.height * chargeArc.arcStrokeWidth
-                capStyle: ShapePath.RoundCap
-                joinStyle: ShapePath.MiterJoin
-                startX: width / 2
-                startY: height * ( 0.5 - chargeArc.scalefactor)
-
-                PathAngleArc {
-                    centerX: parent.width / 2
-                    centerY: parent.height / 2
-                    radiusX: chargeArc.scalefactor * parent.width
-                    radiusY: chargeArc.scalefactor * parent.height
-                    startAngle: -90
-                    sweepAngle: chargeArc.angle
-                    moveToStart: false
-                }
-            }
-        }
-
-        Text {
-            id: batteryDockPercent
-
-            anchors {
-                centerIn: parent
-                verticalCenterOffset: parent.width * 0.22
-            }
-            font {
-                pixelSize: parent.width * .15
-                family: "Noto Sans"
-                styleName: "Condensed Light"
-            }
-            visible: dockMode.active
-            color: chargeArc.colorArray[chargeArc.chargecolor]
-            style: Text.Outline; styleColor: "#80000000"
-            text: batteryChargePercentage.percent
-        }
     }
 
     Item {
@@ -210,15 +95,14 @@ Item {
                 centerIn: parent
             }
             font {
-                pixelSize: root.width * .08
-                family: "Barlow"
+                pixelSize: fontSizeMedium
+                family: fontFamily
                 styleName: "Bold"
             }
-            color: orangeColor
-            //opacity: displayAmbient ? inactiveArcOpacity : activeContentOpacity
-            text: wallClock.time.toLocaleString(Qt.locale(), "MMM").slice(0, 3).toUpperCase() +
-                  " " +
-                  wallClock.time.toLocaleString(Qt.locale(), "dd").slice(0, 2).toUpperCase()
+            color: colorOrange
+            text: wallClock.time.toLocaleString(Qt.locale(), "MMM").slice(0, 3).toUpperCase()
+                  + " "
+                  + wallClock.time.toLocaleString(Qt.locale(), "dd").slice(0, 2).toUpperCase()
         }
 
         Text {
@@ -229,15 +113,13 @@ Item {
                 left: monthName.left
             }
             font {
-                pixelSize: root.width * .07
-                family: "Noto Sans"
+                pixelSize: fontSizeSmall
+                family: fontFamily
                 styleName: "Condensed"
             }
             color: "#ffffffff"
-            //opacity: displayAmbient ? inactiveArcOpacity : activeContentOpacity
             text: wallClock.time.toLocaleString(Qt.locale(), "ddd").slice(0, 3).toUpperCase()
         }
-
     }
 
     Item {
@@ -260,8 +142,8 @@ Item {
             }
 
             font {
-                pixelSize: parent.width * .22
-                family: "Noto Sans"
+                pixelSize: parent.width * .25
+                family: fontFamily
                 styleName: "Regular"
                 letterSpacing: -parent.width * .001
             }
@@ -278,11 +160,11 @@ Item {
                 leftMargin: parent.width * .01
             }
             font {
-                pixelSize: parent.width * .22
-                family: "Noto Sans"
+                pixelSize: parent.width * .25
+                family: fontFamily
                 styleName: "Regular"
             }
-            color: "#ccffffff"
+            color: fontColor
             text: if (use12H.value) {
                       wallClock.time.toLocaleString(Qt.locale(), "hh ap").slice(0, 2)}
                   else
@@ -298,11 +180,11 @@ Item {
                 leftMargin: parent.width * .01
             }
             font {
-                pixelSize: parent.width * .22
-                family: "Noto Sans"
+                pixelSize: parent.width * .25
+                family: fontFamily
                 styleName: "Light"
             }
-            color: "#ddffffff"
+            color: fontColor
             text: wallClock.time.toLocaleString(Qt.locale(), "mm")
         }
 
@@ -313,7 +195,6 @@ Item {
 
             anchors {
                 centerIn: parent
-                //horizontalCenterOffset: -parent.width * .25
             }
             width: parent.width
             height: parent.height
@@ -321,7 +202,7 @@ Item {
             Canvas {
                 z: 6
                 id: secondStrokes
-                property var second: 0
+                property int second: 0
                 anchors.fill: parent
                 smooth: true
                 renderStrategy: Canvas.Cooperative
@@ -330,13 +211,13 @@ Item {
                     ctx.reset()
                     ctx.lineWidth = parent.height/58
                     ctx.lineCap="round"
-                    ctx.strokeStyle = "#8b8b8b"
+                    ctx.strokeStyle = colorLightGrey
                     ctx.translate(parent.width/2, parent.height/2)
                     ctx.rotate(Math.PI)
                     for (var i=0; i <= 60; i++) {
                         ctx.beginPath()
                         ctx.moveTo(0, height*0.367)
-                        ctx.lineTo(0, height*0.395)
+                        ctx.lineTo(0, height*0.387)
                         ctx.stroke()
                         ctx.rotate(Math.PI/30)
                     }
@@ -346,7 +227,7 @@ Item {
             Canvas {
                 z: 6
                 id: secondDisplay
-                property var second: 0
+                property int second: 0
                 anchors.fill: parent
                 smooth: true
                 renderStrategy: Canvas.Cooperative
@@ -355,7 +236,7 @@ Item {
                     ctx.reset()
                     ctx.lineWidth = parent.height/58
                     ctx.lineCap="round"
-                    ctx.strokeStyle = orangeColor
+                    ctx.strokeStyle = colorOrange
                     ctx.translate(parent.width/2, parent.height/2)
                     ctx.rotate(Math.PI)
                     for (var i=0; i <= wallClock.time.getSeconds(); i++) {
@@ -384,14 +265,6 @@ Item {
         height: parent.height * 0.3
         opacity: activeContentOpacity
 
-        //ConfigurationValue {
-        Item {
-            id: timestampDay0
-
-            //key: "/org/asteroidos/weather/timestamp-day0"
-            //defaultValue: 0
-        }
-
         ConfigurationValue {
             id: useFahrenheit
             key: "/org/asteroidos/settings/use-fahrenheit"
@@ -419,7 +292,7 @@ Item {
 
         // Work around for the beta release here. Currently catching for -273° string to display the no data message.
         // Plan is to use the commented check. But the result is always false like used now. Likely due to timestamp0 expecting a listview or delegate?
-        property bool weatherSynced: kelvinToTemperatureString(maxTemp.value) !== "-273°C" //availableDays(timestampDay0.value*1000) > 0
+        property bool weatherSynced: kelvinToTemperatureString(maxTemp.value) !== "-273°C"
 
         Canvas {
             id: weatherRect
@@ -432,7 +305,7 @@ Item {
                 var ctx = getContext("2d")
                 ctx.reset()
                 ctx.beginPath()
-                ctx.fillStyle = "#424242"
+                ctx.fillStyle = colorDarkGrey
                 ctx.strokeStyle = ctx.fillStyle
                 ctx.roundedRect(15, 0, width - 30, height, 27, 27)
 
@@ -456,7 +329,7 @@ Item {
             name: WeatherIcons.getIconName(owmId.value)
         }
 
-// Uncomment for qml-tester
+//        // Uncomment for qml-tester
 //        Text {
 //            id: weatherIcon
 
@@ -465,12 +338,12 @@ Item {
 //                horizontalCenterOffset: -parent.width * .27
 //            }
 //            font {
-//                pixelSize: parent.width * .25
-//                family: "Noto Sans"
+//                pixelSize: fontSizeBig
+//                family: fontFamily
 //                styleName: "Regular"
 //                letterSpacing: parent.width * .001
 //            }
-//            color: "#ccffffff"
+//            color: fontColor
 //            text: "O"
 //        }
 
@@ -484,12 +357,12 @@ Item {
                verticalCenterOffset: -parent.height * .15
             }
             font {
-                pixelSize: parent.width * 0.070
-                family: "Noto Sans"
+                pixelSize: fontSizeSmall
+                family: fontFamily
                 styleName: "Regular"
                 letterSpacing: parent.width * .001
             }
-            color: "#ccffffff"
+            color: fontColor
             text: kelvinToTemperatureString(minTemp.value) + " - " + kelvinToTemperatureString(maxTemp.value)
         }
 
@@ -499,12 +372,12 @@ Item {
             x: parent.width * .4
             width: parent.width * .59
             font {
-                pixelSize: parent.width * 0.070
-                family: "Noto Sans"
+                pixelSize: fontSizeSmall
+                family: fontFamily
                 styleName: "Regular"
                 letterSpacing: parent.width * .001
             }
-            color: "#ccffffff"
+            color: fontColor
             text: WeatherIcons.getWeatherDesc(owmId.value)
             wrapMode: Text.WordWrap
             lineHeight: 0.75
@@ -513,9 +386,6 @@ Item {
 
     Connections {
         target: wallClock
-        function onDisplayAmbientEntered() {
-            hrmSensorActive = false
-        }
 
         function onTimeChanged() {
             var second = wallClock.time.getSeconds()
