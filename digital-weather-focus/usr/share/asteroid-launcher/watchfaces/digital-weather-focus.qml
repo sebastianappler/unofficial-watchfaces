@@ -74,6 +74,21 @@ Item {
     // Set day to use in the weatherBox to today.
     property int dayNb: 0
 
+// Uncomment for qml-tester
+//    property var useFahrenheit: {
+//        "value": false
+//    }
+//    property var owmId: {
+//        //"value": 310
+//        "value": 310
+//    }
+//    property var minTemp: {
+//        "value": 300
+//    }
+//    property var maxTemp: {
+//        "value": 308
+//    }
+
     function kelvinToTemperatureString(kelvin) {
         var celsius = (kelvin - 273);
         if(useFahrenheit.value)
@@ -219,7 +234,7 @@ Item {
                 styleName: "Condensed"
             }
             color: "#ffffffff"
-            opacity: activeContentOpacity
+            //opacity: displayAmbient ? inactiveArcOpacity : activeContentOpacity
             text: wallClock.time.toLocaleString(Qt.locale(), "ddd").slice(0, 3).toUpperCase()
         }
 
@@ -231,10 +246,10 @@ Item {
 
         anchors {
             centerIn: root
-            horizontalCenterOffset: -root.width * .2
+            horizontalCenterOffset: -root.width * .20
             verticalCenterOffset: -root.height * .08
         }
-        width: root.height * 0.55
+        width: root.height * 0.50
         height: width
         opacity: activeContentOpacity
 
@@ -266,7 +281,6 @@ Item {
                 pixelSize: parent.width * .22
                 family: "Noto Sans"
                 styleName: "Regular"
-                //letterSpacing: -parent.width * .001
             }
             color: "#ccffffff"
             text: if (use12H.value) {
@@ -368,7 +382,7 @@ Item {
         }
         width: parent.width
         height: parent.height * 0.3
-
+        opacity: activeContentOpacity
 
         //ConfigurationValue {
         Item {
@@ -379,38 +393,33 @@ Item {
         }
 
         ConfigurationValue {
-        //Item {
             id: useFahrenheit
             key: "/org/asteroidos/settings/use-fahrenheit"
             defaultValue: false
         }
 
         ConfigurationValue {
-        //Item {
             id: owmId
             key: "/org/asteroidos/weather/day" + dayNb + "/id"
             defaultValue: 0
         }
 
         ConfigurationValue {
-        //Item {
+            id: minTemp
+            key: "/org/asteroidos/weather/day" + dayNb + "/min-temp"
+            defaultValue: 0
+        }
+
+        ConfigurationValue {
             id: maxTemp
             key: "/org/asteroidos/weather/day" + dayNb + "/max-temp"
             defaultValue: 0
         }
 
 
-        ConfigurationValue {
-        //Item {
-            id: minTemp
-            key: "/org/asteroidos/weather/day" + dayNb + "/min-temp"
-            defaultValue: 0
-        }
-
-
         // Work around for the beta release here. Currently catching for -273° string to display the no data message.
         // Plan is to use the commented check. But the result is always false like used now. Likely due to timestamp0 expecting a listview or delegate?
-        property bool weatherSynced: kelvinToTemperatureString(maxTemp.value) !== "-273°" //availableDays(timestampDay0.value*1000) > 0
+        property bool weatherSynced: kelvinToTemperatureString(maxTemp.value) !== "-273°C" //availableDays(timestampDay0.value*1000) > 0
 
         Canvas {
             id: weatherRect
@@ -423,7 +432,7 @@ Item {
                 var ctx = getContext("2d")
                 ctx.reset()
                 ctx.beginPath()
-                ctx.fillStyle = Qt.rgba(0.278, 0.278, 0.278, 1)
+                ctx.fillStyle = "#424242"
                 ctx.strokeStyle = ctx.fillStyle
                 ctx.roundedRect(15, 0, width - 30, height, 27, 27)
 
@@ -441,13 +450,13 @@ Item {
                 centerIn: parent
                 horizontalCenterOffset: -parent.width * .27
             }
-            width: parent.width * .25
+            width: parent.width * .22
             height: width
-            opacity: activeContentOpacity
             visible: weatherBox.weatherSynced
             name: WeatherIcons.getIconName(owmId.value)
         }
 
+// Uncomment for qml-tester
 //        Text {
 //            id: weatherIcon
 
@@ -468,14 +477,14 @@ Item {
         Text {
             id: weatherTemperature
 
-            y: parent.height * .15
-            x: parent.width * .40
+            y: parent.height * .16
+            x: parent.width * .4
             anchors {
                horizontalCenterOffset: width / 4
                verticalCenterOffset: -parent.height * .15
             }
             font {
-                pixelSize: parent.width * 0.075
+                pixelSize: parent.width * 0.070
                 family: "Noto Sans"
                 styleName: "Regular"
                 letterSpacing: parent.width * .001
@@ -486,52 +495,20 @@ Item {
 
         Text {
             id: weatherDescription
-            y: parent.height * .50
-            x: parent.width * .40
-            anchors {
-                horizontalCenterOffset: width / 2
-                verticalCenterOffset: parent.height * .15
-
-            }
+            y: parent.height * .45
+            x: parent.width * .4
+            width: parent.width * .59
             font {
-                pixelSize: parent.width * 0.075
+                pixelSize: parent.width * 0.070
                 family: "Noto Sans"
                 styleName: "Regular"
                 letterSpacing: parent.width * .001
             }
             color: "#ccffffff"
             text: WeatherIcons.getWeatherDesc(owmId.value)
+            wrapMode: Text.WordWrap
+            lineHeight: 0.75
         }
-
-//        Label {
-//            id: maxDisplay
-
-//            anchors {
-//                centerIn: parent
-//                verticalCenterOffset: parent.height * (weatherBox.weatherSynced ? .155 : 0)
-//                horizontalCenterOffset: parent.height * (weatherBox.weatherSynced ? .05 : 0)
-//            }
-//            width: parent.width
-//            height: width
-//            horizontalAlignment: Text.AlignHCenter
-//            verticalAlignment: Text.AlignVCenter
-//            opacity: activeContentOpacity
-//            font {
-//                family: "Barlow"
-//                styleName: weatherBox.weatherSynced ? "Medium" : "Bold"
-//                pixelSize: parent.width * (weatherBox.weatherSynced ? .30 : .14)
-//            }
-//            text: weatherBox.weatherSynced ? kelvinToTemperatureString(maxTemp.value) : "NO<br>WEATHER<br>DATA"
-//        }
-
-        // Preparation for a feature to open the weather app when the weatherBox is pressed.
-        // Needs a delegate to hold the application names afaiu
-        /*MouseArea {
-            anchors.fill: weatherBox
-            onClicked: {
-               weather.launchApplication()
-            }
-        }*/
     }
 
     Connections {
@@ -539,6 +516,7 @@ Item {
         function onDisplayAmbientEntered() {
             hrmSensorActive = false
         }
+
         function onTimeChanged() {
             var second = wallClock.time.getSeconds()
             if(secondDisplay.second !== second) {
