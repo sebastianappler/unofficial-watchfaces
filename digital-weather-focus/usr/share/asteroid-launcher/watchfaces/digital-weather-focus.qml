@@ -62,11 +62,23 @@ Item {
     // Set day to use in the weatherBox to today.
     property int dayNb: 0
 
-//    // Uncomment for qml-tester
+    // Uncomment for qml-tester
 //    property var useFahrenheit: { "value": false }
 //    property var owmId: { "value": 310 }
 //    property var minTemp: { "value": 300 }
 //    property var maxTemp: { "value": 308 }
+//    Item {
+//        id: batteryChargePercentage
+//        property int percent: (featureSlider.value * 100).toFixed(0)
+//    }
+
+    MceBatteryState {
+        id: batteryChargeState
+    }
+
+    MceBatteryLevel {
+        id: batteryChargePercentage
+    }
 
     function kelvinToTemperatureString(kelvin) {
         var celsius = (kelvin - 273);
@@ -119,6 +131,73 @@ Item {
             }
             color: "#ffffffff"
             text: wallClock.time.toLocaleString(Qt.locale(), "ddd").slice(0, 3).toUpperCase()
+        }
+    }
+    Item {
+        id: indicatorBox
+
+        anchors {
+            centerIn: root
+            horizontalCenterOffset: root.width * .37
+            verticalCenterOffset: -root.height * .44
+        }
+        width: parent.width
+        height: parent.height * 0.10
+
+        property int value: batteryChargePercentage.percent
+        onValueChanged: batteryiconFilled.requestPaint()
+
+        Image {
+            id: batteryIcon
+            source: "../watchfaces-img/md-battery-dead"
+
+            x: root.width * .34
+            y: root.height * .013
+            width: root.width * .07
+            height: root.height * .07
+            visible: false
+        }
+
+        ColorOverlay{
+            anchors.fill: batteryIcon
+            source: batteryIcon
+            color: fontColor
+            transform: rotation
+            antialiasing: true
+
+
+            Canvas {
+                id: batteryiconFilled
+                anchors.fill: parent
+                smooth: true
+                renderStrategy : Canvas.Cooperative
+                property real filled: -(batteryChargePercentage.percent + 1) * 15 / 100
+                onPaint: {
+                    var ctx = getContext("2d")
+                    ctx.reset()
+                    ctx.beginPath()
+                    ctx.fillStyle = fontColor
+                    ctx.strokeStyle = ctx.fillStyle
+                    ctx.roundedRect(10, 21, 2, filled, 0, 0)
+
+                    ctx.stroke()
+                    ctx.fill()
+                    ctx.closePath()
+                }
+            }
+        }
+
+        Text {
+            id: batteryPercentage
+            x: root.width * .40
+            font {
+                pixelSize: fontSizeMedium
+                family: fontFamily
+                styleName: "Bold"
+            }
+            horizontalAlignment: Text.AlignHCenter
+            color: fontColor
+            text: batteryChargePercentage.percent + "%"
         }
     }
 
@@ -299,7 +378,6 @@ Item {
 
             anchors.fill: parent
             smooth: true
-            visible: !dockMode.active
             renderStrategy : Canvas.Cooperative
             onPaint: {
                 var ctx = getContext("2d")
@@ -321,7 +399,7 @@ Item {
 
             anchors {
                 centerIn: parent
-                horizontalCenterOffset: -parent.width * .27
+                horizontalCenterOffset: -parent.width * .28
             }
             width: parent.width * .22
             height: width
@@ -329,7 +407,7 @@ Item {
             name: WeatherIcons.getIconName(owmId.value)
         }
 
-//        // Uncomment for qml-tester
+        // Uncomment for qml-tester
 //        Text {
 //            id: weatherIcon
 
@@ -351,9 +429,9 @@ Item {
             id: weatherTemperature
 
             y: parent.height * .16
-            x: parent.width * .4
+            x: parent.width * .38
             anchors {
-               horizontalCenterOffset: width / 4
+               horizontalCenterOffset: width * .25
                verticalCenterOffset: -parent.height * .15
             }
             font {
@@ -369,7 +447,7 @@ Item {
         Text {
             id: weatherDescription
             y: parent.height * .45
-            x: parent.width * .4
+            x: parent.width * .38
             width: parent.width * .59
             font {
                 pixelSize: fontSizeSmall
