@@ -113,8 +113,38 @@ Item {
             }
             color: colorOrange
             text: wallClock.time.toLocaleString(Qt.locale(), "MMM").slice(0, 3).toUpperCase()
-                  + " "
-                  + wallClock.time.toLocaleString(Qt.locale(), "dd").slice(0, 2).toUpperCase()
+        }
+
+        Text {
+            id: monthSeparator
+
+            anchors {
+                left: monthName.right
+                bottom: monthName.bottom
+            }
+            font {
+                pixelSize: fontSizeMedium
+                family: fontFamily
+                styleName: "Bold"
+            }
+            color: colorOrange
+            text: " "
+        }
+
+        Text {
+            id: monthNumber
+
+            anchors {
+                left: monthSeparator.right
+                bottom: monthSeparator.bottom
+            }
+            font {
+                pixelSize: fontSizeMedium
+                family: fontFamily
+                styleName: "Bold"
+            }
+            color: colorOrange
+            text: wallClock.time.toLocaleString(Qt.locale(), "dd").slice(0, 2).toUpperCase()
         }
 
         Text {
@@ -171,7 +201,7 @@ Item {
                 anchors.fill: parent
                 smooth: true
                 renderStrategy : Canvas.Cooperative
-                property real filled: -(batteryChargePercentage.percent + 1) * 15 / 100
+                property real filled: -(batteryChargePercentage.percent + 1) * 14 / 100
                 onPaint: {
                     var ctx = getContext("2d")
                     ctx.reset()
@@ -282,6 +312,8 @@ Item {
                 z: 6
                 id: secondStrokes
                 property int second: 0
+                property string strokeColor: displayAmbient ? colorOrange : colorLightGrey
+                onStrokeColorChanged: secondStrokes.requestPaint()
                 anchors.fill: parent
                 smooth: true
                 renderStrategy: Canvas.Cooperative
@@ -290,7 +322,7 @@ Item {
                     ctx.reset()
                     ctx.lineWidth = parent.height/58
                     ctx.lineCap="round"
-                    ctx.strokeStyle = colorLightGrey
+                    ctx.strokeStyle = strokeColor
                     ctx.translate(parent.width/2, parent.height/2)
                     ctx.rotate(Math.PI)
                     for (var i=0; i <= 60; i++) {
@@ -307,23 +339,27 @@ Item {
                 z: 6
                 id: secondDisplay
                 property int second: 0
+                property string strokeColor: displayAmbient ? "transparent" : colorOrange
+                onStrokeColorChanged: secondDisplay.requestPaint()
                 anchors.fill: parent
                 smooth: true
                 renderStrategy: Canvas.Cooperative
                 onPaint: {
                     var ctx = getContext("2d")
                     ctx.reset()
-                    ctx.lineWidth = parent.height/58
-                    ctx.lineCap="round"
-                    ctx.strokeStyle = colorOrange
-                    ctx.translate(parent.width/2, parent.height/2)
-                    ctx.rotate(Math.PI)
-                    for (var i=0; i <= wallClock.time.getSeconds(); i++) {
-                        ctx.beginPath()
-                        ctx.moveTo(0, height*0.367)
-                        ctx.lineTo(0, height*0.387)
-                        ctx.stroke()
-                        ctx.rotate(Math.PI/30)
+                    if(strokeColor != "transparent") {
+                        ctx.lineWidth = parent.height/58
+                        ctx.lineCap="round"
+                        ctx.strokeStyle = strokeColor
+                        ctx.translate(parent.width/2, parent.height/2)
+                        ctx.rotate(Math.PI)
+                        for (var i=0; i <= wallClock.time.getSeconds(); i++) {
+                            ctx.beginPath()
+                            ctx.moveTo(0, height*0.367)
+                            ctx.lineTo(0, height*0.387)
+                            ctx.stroke()
+                            ctx.rotate(Math.PI/30)
+                        }
                     }
                 }
             }
